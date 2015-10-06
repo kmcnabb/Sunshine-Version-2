@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -10,9 +11,11 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.text.format.Time;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +37,8 @@ import org.json.JSONArray;
  */
 
 public class ForecastFragment extends android.support.v4.app.Fragment {
+    //Just trying stuff.
+    protected ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -63,8 +68,17 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        //Just trying stuff. Added these five lines of code.
+        mForecastAdapter = new ArrayAdapter<String>(
+                getActivity(),
+                R.layout.list_item_forecast,
+                R.id.list_item_forecast_textview,
+                new ArrayList<String>());
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        //Just trying stuff. Don't need the fake data anymore.
         String [] forecastArray = {
                 "Today - SmileyFaces - 88/63",
                 "Tomorrow - Foggy - 70/40",
@@ -78,15 +92,33 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
         List<String> weekForecast = new ArrayList<String>(
                 Arrays.asList(forecastArray));
 
-        ArrayAdapter<String> myForecastAdapter =
-                new ArrayAdapter<String>(
-                        getActivity(),
-                        R.layout.list_item_forecast,
-                        R.id.list_item_forecast_textview,
-                        weekForecast);
+        //myForecastAdapter =
+        //        new ArrayAdapter<String>(
+        //                getActivity(),
+        //                R.layout.list_item_forecast,
+        //                R.id.list_item_forecast_textview,
+        //                weekForecast);
 
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
-        listView.setAdapter(myForecastAdapter);
+        listView.setAdapter(mForecastAdapter); //Just trying stuff. Changed from myForecast Adapter.
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                String forecast = mForecastAdapter.getItem(i);
+                Intent intent = new Intent(getActivity(), DetailActivity.class ).putExtra(Intent.EXTRA_TEXT, forecast);
+                startActivity(intent);
+            }
+        });
+
+        //listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            //@Override
+            //public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            //    String forecast = mForecastAdapter.getItem(i);
+                    //Toast.makeText(getActivity(), item, Toast.LENGTH_SHORT).show();
+            //    Intent intent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT. forecast);
+            //    startActivity(intent);
+            //}
+        //});
 
         return rootView;
     }
@@ -255,7 +287,7 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
                 }
 
                 if (buffer.length() == 0) {
-                    // Stream was empty.  No point in parsing.
+                    // Stream was empty.  No point in parsing. This will only happen if there was an error getting or parsing the forecast.
                     forecastJsonStr = null;
                 }
                 forecastJsonStr = buffer.toString();
@@ -291,5 +323,17 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
 
             return weatherForecasts;
         }
+
+        @Override
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
+                mForecastAdapter.clear();
+                for (String dayForecastStr : result) {
+                    mForecastAdapter.add(dayForecastStr);
+                }
+                //New data is back from the server. Yay!
+            }
+        }
+
     }
 }
