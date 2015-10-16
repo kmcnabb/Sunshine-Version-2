@@ -246,6 +246,7 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
         @Override
         protected String[] doInBackground(String... params) {
             // It there's no zip code, there's nothing to look up. Verify size of params.
+            Log.v(LOG_TAG, "PARAMS STRING: nothing" + params);
             if (params.length == 0) {
                 return null;
             }
@@ -266,7 +267,8 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are available at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/dail?";
+                //final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/dail?";
+                final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/city?id=524901&APPID=b33979595a585dba0c5a234690767dcf";
                 final String QUERY_PARAM = "q";
                 final String FORMAT_PARAM = "mode";
                 final String UNITS_PARAM = "units";
@@ -278,6 +280,8 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
                         .appendQueryParameter(UNITS_PARAM, units)
                         .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
                         .build();
+
+                Log.v(LOG_TAG, "buildUri is :" + builtUri);
 
                 URL url = new URL(builtUri.toString());
 
@@ -346,7 +350,9 @@ public class ForecastFragment extends android.support.v4.app.Fragment {
             if (result != null) {
                 mForecastAdapter.clear();
                 for (String dayForecastStr : result) {
-                    mForecastAdapter.add(dayForecastStr);
+                    if (dayForecastStr != null && !dayForecastStr.isEmpty()) {
+                        mForecastAdapter.add(dayForecastStr);
+                    }
                 }
                 //New data is back from the server. Yay!
             }
